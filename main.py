@@ -3,6 +3,7 @@ v1list = []
 v2list = []
 pluralnounlist = []
 adjectivelist = []
+truths = []
 
 with open('verbs.csv') as file:
     reader = csv.DictReader(file)
@@ -114,7 +115,7 @@ def objectrefiner(truth):
     if truth['object'].istitle() or truth['object'] in objectpronoun:
         whom = True
     for word in sentence_to_words(truth['object']):
-        if word == 'at' or word == 'in' or word == 'on':
+        if word == 'at' or word == 'in' or word == 'on' or word == 'from' or word == 'to':
             whenorwhere = True
     partofday = ['morning', 'evening', 'noon']
     year = []
@@ -143,112 +144,146 @@ def objectrefiner(truth):
 
     return truth
 
-def answer(data, question):
+def answer(data, questionpermanent):
     #Input: data,question        #sentence that can be processed and question that is to be asked on the processed sentence
     #Output: answer to the question according to data
-    truth = sentencetoobject(sentence)
-    truth = objectrefiner(truth)
-    print(truth)
+    question = questionpermanent
+    for i in range(len(data)):
+        truths.append(objectrefiner(sentencetoobject(data[i])))        
+    print(truths)
     questionwordlist = sentence_to_words(question)
-    questionobject = sentencetoobject(question)
+    questionobject = sentencetoobject(question)    
 
-    if questionwordlist[0] == 'Who':    
-        if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
-            if questionobject['object'] in truth['object'].values():
-                if 'who' in truth['subject'].keys():
-                    return truth['subject']['who']
+    if questionwordlist[0] == 'Who': 
+        for truth in truths: 
+            question = questionpermanent
+            questionwordlist = sentence_to_words(question)
+            questionobject = sentencetoobject(question)                      
+            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
+                if questionobject['object'] in truth['object'].values():
+                    if 'who' in truth['subject'].keys():
+                        return truth['subject']['who']
 
-    if questionwordlist[0] == 'What':        
-        questionwordlist.remove('What')
-        question = ' '.join(questionwordlist)
-        questionobject = sentencetoobject(question)  
-        
-        if 'does' in questionwordlist:
-            if 'does' in questionwordlist:        
-                questionwordlist.remove('does')
+    if questionwordlist[0] == 'What':  
+        for truth in truths: 
+            question = questionpermanent
+            questionwordlist = sentence_to_words(question)
+            questionobject = sentencetoobject(question)     
+            questionwordlist.remove('What')
             question = ' '.join(questionwordlist)
-            questionobject = sentencetoobject(question)               
-            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is')  :
-                if questionobject['subject'].capitalize() in truth['subject'].values(): 
-                    if 'what' in truth['object'].keys():
-                        return truth['object']['what']
-        
-        if 'is' in questionwordlist:
-            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is') :
-                if questionobject['object'].capitalize() in truth['subject'].values(): 
-                    if 'what' in truth['object'].keys():
-                        return truth['object']['what']
-        
-        
-        if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
-            if questionobject['object'] in truth['object'].values():
-                if 'what' in truth['subject'].keys():
-                    return truth['subject']['what']
+            questionobject = sentencetoobject(question)  
+            
+            if 'does' in questionwordlist:
+                if 'does' in questionwordlist:        
+                    questionwordlist.remove('does')
+                question = ' '.join(questionwordlist)
+                questionobject = sentencetoobject(question)                            
+                if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is')  :
+                    if questionobject['subject'].capitalize() in truth['subject'].values(): 
+                        if 'what' in truth['object'].keys():
+                            return truth['object']['what']
+            
+            if 'is' in questionwordlist:
+                if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is') :
+                    if questionobject['object'].capitalize() in truth['subject'].values(): 
+                        if 'what' in truth['object'].keys():
+                            return truth['object']['what']
+            
+            
+            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
+                if questionobject['object'] in truth['object'].values():
+                    if 'what' in truth['subject'].keys():
+                        return truth['subject']['what']
 
-        print(questionobject)
+            print(questionobject)
 
     if questionwordlist[0] == 'How':
-        questionwordlist.remove('How')
-        question = ' '.join(questionwordlist)
-        questionobject = sentencetoobject(question)
-        print(questionobject)
-        if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
-            if questionobject['object'].capitalize() in truth['subject'].values():  
-                if 'how' in truth['object'].keys(): 
-                    return truth['object']['how']
+        for truth in truths:
+            question = questionpermanent
+            questionwordlist = sentence_to_words(question)
+            questionobject = sentencetoobject(question)
+            questionwordlist.remove('How')
+            question = ' '.join(questionwordlist)
+            questionobject = sentencetoobject(question)
+            print(questionobject)
+            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
+                if questionobject['object'].capitalize() in truth['subject'].values():  
+                    if 'how' in truth['object'].keys(): 
+                        return truth['object']['how']
 
     if questionwordlist[0] == 'Whom':
-        questionwordlist.remove('Whom')
-        if 'being' in questionwordlist:
-            questionwordlist.remove('being')
-        if 'does' in questionwordlist:
-            questionwordlist.remove('does')
-        if 'do' in questionwordlist:
-            questionwordlist.remove('do') 
-        question = ' '.join(questionwordlist)
-        questionobject = sentencetoobject(question)
-        print(questionobject)       
-        if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
-            if questionobject['object'].capitalize() in truth['subject'].values() or questionobject['subject'].capitalize() in truth['subject'].values():
-                if 'whom' in truth['object'].keys(): 
-                    return truth['object']['whom']
+        for truth in truths:
+            question = questionpermanent
+            questionwordlist = sentence_to_words(question)
+            questionobject = sentencetoobject(question)
+            questionwordlist.remove('Whom')
+            if 'being' in questionwordlist:
+                questionwordlist.remove('being')
+            if 'does' in questionwordlist:
+                questionwordlist.remove('does')
+            if 'do' in questionwordlist:
+                questionwordlist.remove('do') 
+            question = ' '.join(questionwordlist)
+            questionobject = sentencetoobject(question)
+            print(questionobject)       
+            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
+                if questionobject['object'].capitalize() in truth['subject'].values() or questionobject['subject'].capitalize() in truth['subject'].values():
+                    if 'whom' in truth['object'].keys(): 
+                        return truth['object']['whom']
 
     if questionwordlist[0] == 'When':
-        questionwordlist.remove('When')
-        if 'being' in questionwordlist:
-            questionwordlist.remove('being')
-        if 'does' in questionwordlist:
-            questionwordlist.remove('does')
-        if 'do' in questionwordlist:
-            questionwordlist.remove('do') 
-        question = ' '.join(questionwordlist)
-        questionobject = sentencetoobject(question)
-        print(questionobject) 
-        if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
-            if questionobject['object'].capitalize() in truth['subject'].values() or questionobject['subject'].capitalize() in truth['subject'].values():
-                if 'when' in truth['object'].keys():
-                    return truth['object']['when']
+        for truth in truths:
+            question = questionpermanent
+            questionwordlist = sentence_to_words(question)
+            questionobject = sentencetoobject(question)
+            questionwordlist.remove('When')
+            if 'being' in questionwordlist:
+                questionwordlist.remove('being')
+            if 'does' in questionwordlist:
+                questionwordlist.remove('does')
+            if 'do' in questionwordlist:
+                questionwordlist.remove('do') 
+            question = ' '.join(questionwordlist)
+            questionobject = sentencetoobject(question)
+            print(questionobject) 
+            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
+                if questionobject['object'].capitalize() in truth['subject'].values() or questionobject['subject'].capitalize() in truth['subject'].values():
+                    if 'when' in truth['object'].keys():
+                        return truth['object']['when']
 
     if questionwordlist[0] == 'Where':
-        questionwordlist.remove('Where')
-    if 'being' in questionwordlist:
-        questionwordlist.remove('being')
-    if 'does' in questionwordlist:
-        questionwordlist.remove('does')
-    if 'do' in questionwordlist:
-        questionwordlist.remove('do') 
-    question = ' '.join(questionwordlist)
-    questionobject = sentencetoobject(question)
-    print(questionobject) 
-    if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
-        if questionobject['object'].capitalize() in truth['subject'].values() or questionobject['subject'].capitalize() in truth['subject'].values():
-            if 'where' in truth['object'].keys():
-                return truth['object']['where']
+        for truth in truths:
+            question = questionpermanent
+            questionwordlist = sentence_to_words(question)
+            questionobject = sentencetoobject(question)
+            questionwordlist.remove('Where')
+            if 'being' in questionwordlist:
+                questionwordlist.remove('being')
+            if 'does' in questionwordlist:
+                questionwordlist.remove('does')
+            if 'do' in questionwordlist:
+                questionwordlist.remove('do') 
+            question = ' '.join(questionwordlist)
+            questionobject = sentencetoobject(question)
+            print(questionobject) 
+            if truth['verb'] == questionobject['verb'] or truth['verb'] == questionobject['verb'] + 's' or truth['verb']+'s' == questionobject['verb'] or (truth['verb']=='is' and questionobject['verb']=='are') or (truth['verb']=='are' and questionobject['verb']=='is'):
+                if questionobject['object'].capitalize() in truth['subject'].values() or questionobject['subject'].capitalize() in truth['subject'].values():
+                    if 'where' in truth['object'].keys():
+                        return truth['object']['where']
 
-sentence = 'I eat in Dolpa'
-question = 'Where do I eat'
-ans = answer(sentence, question)
+arrayofsentence = ['A cat is in the room','He hit a car','He is a dog']
+question = 'What is he'
+ans = answer(arrayofsentence, question)
 print(ans)
+
+
+#changes needed to be made
+#1)  A man, A woman, A human ... should be the answer of who not what
+#2)  here, there should be the answer of where
+
+
+
+
 
 
 
